@@ -1,0 +1,244 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Cloudformation template that contains IAM roles relating to the organisation service'
+
+Parameters:
+  Prefix:
+    Type: String
+    Description: The stack prefix  
+
+  Environment:
+    Type: String
+    Description: The environment that the stack is deployed to
+    Default: sbx
+    AllowedValues:
+      - prd
+      - tst
+      - dev
+      - stg
+      - sbx
+      - int
+  
+  BucketName:
+    Type: String
+    Description: The S3 bucket name which has swagger document
+
+  Component:
+    Type: String
+    Description: component
+    Default: api
+
+Resources:
+  ApiGatewayLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Environment}-${Prefix}-${Component}-gateway-rol
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action :
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: !Sub ${Environment}-${Prefix}-${Component}-pol
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                - lambda:InvokeFunction
+                - iam:PassRole
+                Resource: 
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-GetAllRelationships:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-GetAllServices:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-GetAllTenants:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-GetLocation:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-GetService:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-GetTenant:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PostLocation:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PostRelationship:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PostService:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PostTenant:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PutLocation:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PutService:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-UpdateTenant:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-DeleteLinkedServices:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-DeleteLinkedLocations:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-SearchOrganisation:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-SearchLocation:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-SearchService:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-UpdateDataToES:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-authoriser-AuthoriserFunction-*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-${Component}-lmd-PatchRelationship:*"
+                - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Environment}-${Prefix}-org-authoriser-AuthoriserFunction-*"
+              - Effect: Allow
+                Action:
+                - s3:Get*
+                - s3:List*
+                Resource: 
+                - !Sub "arn:aws:s3:::${BucketName}/*"
+              - Effect: Allow
+                Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:DescribeLogGroups
+                - logs:DescribeLogStreams
+                - logs:PutLogEvents
+                - logs:GetLogEvents
+                - logs:FilterLogEvents
+                Resource:
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
+              - Effect: Allow
+                Action:
+                - sqs:*
+                Resource: 
+                - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Prefix}-${Environment}-organisations-ESQueue"
+  
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Environment}-${Prefix}-api-lambda-execution-rol
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action :
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: !Sub ${Environment}-${Prefix}-api-lambda-execution-pol
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                - sts:AssumeRole
+                Resource:
+                - !Ref AuditRoleArn
+                - !Ref LogRoleArn
+              - Effect: Allow
+                Action:
+                - logs:CreateLogStream                
+                - logs:CreateLogGroup
+                - logs:PutLogEvents   
+                Resource:
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-GetAllRelationships:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-GetAllServices:*" 
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-GetAllTenants:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-GetLocation:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-GetService:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-GetTenant:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PostLocation:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PostRelationship:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PostService:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PostTenant:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PutLocation:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PutService:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-UpdateTenant:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-DeleteLinkedServices:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-DeleteLinkedLocations:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-SearchOrganisation:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-SearchService:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-SearchLocation:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-UpdateDataToES:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-${Component}-lmd-PatchRelationship:*"
+                - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Environment}-${Prefix}-org-authoriser-AuthoriserFunction-*"
+              - Effect: Allow
+                Action:
+                - clouddirectory:*
+                Resource: 
+                - !Sub "arn:aws:clouddirectory:${AWS::Region}:${AWS::AccountId}:directory/*"
+              - Effect: Allow
+                Action:
+                - clouddirectory:ListPublishedSchemaArns
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - s3:Get*
+                - s3:List*
+                Resource: 
+                - !Sub "arn:aws:s3:::${BucketName}/*"
+              - Effect: Allow
+                Action:
+                - ssm:GetParameter
+                Resource: 
+                - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+              - Effect: Allow
+                Action:
+                - sns:Publish
+                Resource: 
+                - !Sub "arn:aws:sns:${AWS::Region}:${EventEngineAccountId}:${EventEngineTopicName}"
+                - !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${Prefix}-${Environment}-organisations-ESTopic"
+              - Effect: Allow
+                Action:
+                - kms:Decrypt
+                - kms:Encrypt
+                - kms:ReEncrypt*
+                - kms:GenerateDataKey*
+                Resource: 
+                - !Sub "arn:aws:kms:${AWS::Region}:${EventEngineAccountId}:key/*"
+              - Effect: Allow
+                Action:
+                - es:ESHttpGet
+                - es:ESHttpPost
+                - es:ESHttpPut
+                Resource: 
+                - !Sub "arn:aws:es:*:*:domain/${Prefix}-${Environment}-es*"
+              - Effect: Allow
+                Action:
+                - sqs:*
+                Resource: 
+                - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Prefix}-${Environment}-organisations-ESQueue"
+                
+  ElasticIndexCreation:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Environment}-${Prefix}-${Component}-es-indexcreation-rol
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: ElasticIndexCreationRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub "arn:aws:logs:*:*:log-group:/aws/lambda/${Prefix}-${Environment}-ESIndexCreation:*"
+              - Effect: Allow
+                Action:
+                  - es:ESHttpPost
+                  - es:ESHttpPut
+                Resource:
+                  - !Sub "arn:aws:es:*:*:domain/${Prefix}-${Environment}-es*"
+
+Outputs:
+  ApiGatewayLambdaExecutionRole:
+    Description: The arn of the iam role used by the api gateway to execute lambda
+    Value: !GetAtt ApiGatewayLambdaExecutionRole.Arn
+    
+  LambdaExecutionRole:
+    Description: The arn of the iam role used by the lambda
+    Value: !GetAtt LambdaExecutionRole.Arn
+
+  ElasticIndexCreationRole:
+    Description: The arn of the IAM role to be used by Lambda to create Index
+    Value: !GetAtt ElasticIndexCreation.Arn
