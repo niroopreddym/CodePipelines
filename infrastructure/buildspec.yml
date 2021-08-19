@@ -4,6 +4,8 @@ phases:
   build:
     commands:
       - echo Build started on `date`
+      - apt-get update -y
+      - apt install --reinstall sed
       - git config --global url."https://$GITHUB_TOKEN:x-oauth-basic@github.com/".insteadOf "https://github.com/"
   post_build:
     commands:
