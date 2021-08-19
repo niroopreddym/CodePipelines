@@ -12,7 +12,8 @@ phases:
       - aws cloudformation package --template-file aws-stacks/s3updates-stack.yml --s3-bucket $ARTIFACTS_BUCKET --output-template-file aws-stacks/s3updates-stack_release.yaml
       - aws s3 cp configuration.json s3://$ARTIFACTS_BUCKET/configuration.json
       - cd -
+      - ls -la
 artifacts:
   files:
-    - aws-stacks/s3updates-stack_release.yaml
+    - 'infrastructure/aws-stacks/s3updates-stack_release.yaml'
   discard-paths: yes
