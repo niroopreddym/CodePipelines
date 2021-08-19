@@ -5,7 +5,7 @@ BUCKETNAME = s3snstest
 GITHUBOWNER = niroopreddym
 GITHUBREPO = CodePipelines
 GITHUBBRANCH = master
-GITTOKEN = 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
+GITTOKEN = /*dummy token*/
 
 .PHONY: explain
 explain:
