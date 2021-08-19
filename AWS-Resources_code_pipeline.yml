@@ -134,7 +134,7 @@ Resources:
   CloudFormationRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${Environment}-${StackPrefix}-${Component}-cloudformation-rol
+      RoleName: !Sub ${Environment}-${Prefix}-cloudformation-rol
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -146,17 +146,12 @@ Resources:
               - sts:AssumeRole
       Path: /
       Policies:
-      - PolicyName: !Sub ${Environment}-${StackPrefix}-${Component}-cloudformation-role-pol
+      - PolicyName: !Sub ${Environment}-${Prefix}-cloudformation-role-pol
         PolicyDocument:
           Version: 2012-10-17
           Statement:
             - Effect: Allow
               Action:
-                - apigateway:GET
-                - apigateway:DELETE
-                - apigateway:PATCH
-                - apigateway:POST
-                - apigateway:PUT
                 - cloudformation:CreateChangeSet
                 - codedeploy:CreateApplication
                 - codedeploy:CreateDeployment
@@ -166,10 +161,6 @@ Resources:
                 - codedeploy:GetDeployment 
                 - codedeploy:GetDeploymentConfig
                 - codedeploy:RegisterApplicationRevision
-                - cognito-idp:CreateUserPool
-                - cognito-idp:CreateUserPoolClient
-                - cognito-idp:DeleteUserPool
-                - cognito-idp:DeleteUserPoolClient
                 - iam:CreateRole
                 - iam:GetRole
                 - iam:GetRolePolicy
@@ -187,27 +178,6 @@ Resources:
                 - iam:CreateServiceLinkedRole
                 - iam:DeleteServiceLinkedRole
                 - iam:GetServiceLinkedRoleDeletionStatus
-                - lambda:AddPermission
-                - lambda:CreateAlias
-                - lambda:GetAlias
-                - lambda:CreateFunction
-                - lambda:DeleteFunction
-                - lambda:DeleteAlias
-                - lambda:GetFunction
-                - lambda:GetFunctionConfiguration
-                - lambda:InvokeFunction
-                - lambda:ListTags
-                - lambda:ListVersionsByFunction
-                - lambda:PublishVersion
-                - lambda:RemovePermission
-                - lambda:CreateEventSourceMapping
-                - lambda:DeleteEventSourceMapping
-                - lambda:GetEventSourceMapping
-                - lambda:TagResource
-                - lambda:UntagResource
-                - lambda:UpdateAlias
-                - lambda:UpdateFunctionCode
-                - lambda:UpdateFunctionConfiguration
                 - s3:CreateBucket
                 - s3:DeleteBucket
                 - s3:DeleteBucketPolicy
@@ -218,7 +188,6 @@ Resources:
                 - s3:PutBucketPolicy
                 - s3:PutBucketPublicAccessBlock
                 - s3:PutBucketCORS
-                - ssm:GetParameters
               Resource: "*"
             - Effect: Allow
               Action:
@@ -227,30 +196,14 @@ Resources:
                 - s3:GetObject
                 - s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::${Environment}-${StackPrefix}-${Component}-s3-artifacts/*
-            - Effect: Allow
-              Action:
-                - ec2:*
-              Resource: "*"
-            - Effect: Allow
-              Action:
-                - ecs:*
-              Resource: "*"
-            - Effect: Allow
-              Action:
-                - ecr:*
-              Resource: "*"
+                - '*'
             - Effect: Allow
               Action:
                 - logs:*     
               Resource: "*"
             - Effect: Allow
               Action:
-                - events:PutRule
-                - events:DescribeRule
-                - events:RemoveTargets
-                - events:PutTargets
-                - events:DeleteRule
+                - sns:*
               Resource: "*"
 
   CodeBuildRole:

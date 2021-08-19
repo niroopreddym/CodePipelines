@@ -16,4 +16,5 @@ phases:
 artifacts:
   files:
     - 'infrastructure/aws-stacks/s3updates-stack_release.yaml'
+    - 'infrastructure/configuration.json'
   discard-paths: yes

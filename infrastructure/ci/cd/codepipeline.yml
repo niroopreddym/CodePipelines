@@ -145,6 +145,81 @@ Resources:
               Resource: 
               - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-${Prefix}/*"
 
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Environment}-${Prefix}-cloudformation-rol
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: !Sub ${Environment}-${Prefix}-cloudformation-role-pol
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - cloudformation:CreateChangeSet
+                - codedeploy:CreateApplication
+                - codedeploy:CreateDeployment
+                - codedeploy:CreateDeploymentGroup 
+                - codedeploy:DeleteApplication
+                - codedeploy:DeleteDeploymentGroup
+                - codedeploy:GetDeployment 
+                - codedeploy:GetDeploymentConfig
+                - codedeploy:RegisterApplicationRevision
+                - iam:CreateRole
+                - iam:GetRole
+                - iam:GetRolePolicy
+                - iam:AttachRolePolicy
+                - iam:DetachRolePolicy
+                - iam:DeleteRolePolicy
+                - iam:DeleteRole
+                - iam:PassRole
+                - iam:PutRolePolicy
+                - iam:GetPolicy
+                - iam:GetPolicyVersion
+                - iam:TagRole
+                - iam:ListRoles
+                - iam:UpdateAssumeRolePolicy
+                - iam:CreateServiceLinkedRole
+                - iam:DeleteServiceLinkedRole
+                - iam:GetServiceLinkedRoleDeletionStatus
+                - s3:CreateBucket
+                - s3:DeleteBucket
+                - s3:DeleteBucketPolicy
+                - s3:SetBucketEncryption
+                - s3:GetEncryptionConfiguration
+                - s3:PutEncryptionConfiguration
+                - s3:PutBucketVersioning
+                - s3:PutBucketPolicy
+                - s3:PutBucketPublicAccessBlock
+                - s3:PutBucketCORS
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+                - s3:GetBucketPolicy
+                - s3:GetObject
+                - s3:ListBucket
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - logs:*     
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - sns:*
+              Resource: "*"
+
   WebHook:
     Type: AWS::CodePipeline::Webhook
     Properties: 
@@ -228,4 +303,23 @@ Resources:
               Name: Build-S3Updates-Stack
               OutputArtifacts: 
                 - Name: BuildOutput
+              RunOrder: 1
+
+        - Name : Deploy
+          Actions:
+            - ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName: ${Prefix}-${Environment}-s3updates-deploy-stack
+                TemplateConfiguration: 'BuildOutput::configuration.json'
+                TemplatePath: 'BuildOutput::s3updates-stack_release.yaml'
+              InputArtifacts: 
+                - Name: BuildOutput
+              Name: Deploy-S3Updates-Stack
               RunOrder: 1
