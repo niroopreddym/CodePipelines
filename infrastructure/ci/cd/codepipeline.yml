@@ -257,7 +257,7 @@ Resources:
         - Name: ARTIFACTS_BUCKET
           Value: !Select [5, !Split [":", !GetAtt ArtifactsBucket.Arn]]
         - Name: S3BUCKETNAME
-          Value: 'S3UpdatesBucket'
+          Value: 'snsupdatesbucket'
       Source:
         BuildSpec: infrastructure/buildspec.yml
         Type: CODEPIPELINE
