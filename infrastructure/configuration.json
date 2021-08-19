@@ -1,8 +1,8 @@
 {
     "Parameters": {
-        "Prefix": "PARAM_PREFIX",
-        "Environment": "PARAM_ENVIRONMENT",
-        "BucketName": "PARAM_BUCKETNAME"
+        "Prefix": "{PARAM_PREFIX}",
+        "Environment": "{PARAM_ENVIRONMENT}",
+        "BucketName": "{PARAM_BUCKETNAME}"
     },
     "StackPolicy": {
         "Statement": [
