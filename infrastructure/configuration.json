@@ -1,0 +1,18 @@
+{
+    "Parameters": {
+        "Prefix": "PARAM_PREFIX",
+        "Environment": "PARAM_ENVIRONMENT",
+        "BucketName": "PARAM_BUCKETNAME",
+        "ArtifactsBucket":"PARAM_ARTIFACTSBUCKET"
+    },
+    "StackPolicy": {
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": "Update:*",
+                "Principal": "*",
+                "Resource": "*"
+            }
+        ]
+    }
+}

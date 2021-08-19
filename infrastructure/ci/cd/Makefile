@@ -1,8 +1,11 @@
 PROFILE = default
 ENVIRONMENT = sbx
 PREFIX = niroop
-PROFILE = default
 BUCKETNAME = s3snstest
+GITHUBOWNER = niroopreddym
+GITHUBREPO = CodePipelines
+GITHUBBRANCH = master
+GITTOKEN = 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
 
 .PHONY: explain
 explain:
@@ -44,9 +47,9 @@ validate_template: ## validates the yaml file
 create_update_pipeline: ## Creates or updates the infrastructure using the cfn template
 	aws cloudformation ${ACTION}-stack \
 		--stack-name $(PREFIX)-$(ENVIRONMENT)-s3updates \
-		--template-body file://s3updates-stack.yml \
+		--template-body file://codepipeline.yml \
 		--profile $(PROFILE) \
-		--capabilities CAPABILITY_AUTO_EXPAND \
+		--capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM \
 		--region "eu-west-2" \
 		--parameters \
 			ParameterKey=Prefix,ParameterValue=$(PREFIX) \
@@ -56,7 +59,3 @@ create_update_pipeline: ## Creates or updates the infrastructure using the cfn t
 			ParameterKey=GitHubRepo,ParameterValue=$(GITHUBREPO) \
 			ParameterKey=GitHubBranch,ParameterValue=$(GITHUBBRANCH) \
 			ParameterKey=GitToken,ParameterValue=$(GITTOKEN) \
-
-
-
-

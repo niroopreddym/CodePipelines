@@ -43,11 +43,11 @@ Parameters:
 Resources:
   ArtifactsBucket:
     Type: AWS::S3::Bucket
-      Properties:
-        AccessControl: Private
-        VersioningConfiguration:
-          Status: Enabled
-        BucketName: !Sub ${Environment}-${Prefix}-s3-artifacts
+    Properties:
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+      BucketName: !Sub ${Environment}-${Prefix}-s3-artifacts
 
   PipelineRole:
     Type: AWS::IAM::Role
@@ -85,6 +85,7 @@ Resources:
             - cloudformation:UpdateStack
             - cloudformation:SetStackPolicy
             - iam:PassRole
+            - iam:*
             Resource: "*"
           - Effect: Allow
             Sid: policyforSourceToS3
@@ -98,18 +99,21 @@ Resources:
                 - ''
                 - - !GetAtt ArtifactsBucket.Arn
                   - "/*"
+
   CodeBuildRole:
     Type: AWS::IAM::Role
-    DependsOn: ArtifactsStore
+    DependsOn: ArtifactsBucket
     Properties:
       RoleName: !Sub ${Environment}-${Prefix}-codebuild-rol
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
         - Effect: Allow
-          Action: ['sts:AssumeRole']
           Principal:
-            Service: ['codebuild.amazonaws.com']
+            Service:
+            - 'codebuild.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
       Path: /
       Policies:
       - PolicyName: Permissions
@@ -133,7 +137,7 @@ Resources:
               Resource:
                 !Join
                   - ''
-                  - - !GetAtt ArtifactsStore.Arn
+                  - - !GetAtt ArtifactsBucket.Arn
                     - "/*"
             - Sid: "DescribeStacks"
               Effect: "Allow"
@@ -158,7 +162,7 @@ Resources:
 
   BuildS3UpdatesStack:
     Type: AWS::CodeBuild::Project
-    DependsOn: ArtifactsStore
+    DependsOn: ArtifactsBucket
     Properties:
       Name:  !Sub ${Environment}-${Prefix}-cb
       Description: Builds the resources for S3 Updates
@@ -173,12 +177,12 @@ Resources:
         EnvironmentVariables:
         - Name: ENVIRONMENT
           Value: !Ref Environment
-        - Name: STACK_PREFIX
+        - Name: PREFIX
           Value: !Ref Prefix
         - Name: ARTIFACTS_BUCKET
-          Value: !Select [5, !Split [":", !GetAtt ArtifactsStore.Arn]]
-        - Name: INCLUDE_ROLE
-          Value: !Ref IncludeIAMRole
+          Value: !Select [5, !Split [":", !GetAtt ArtifactsBucket.Arn]]
+        - Name: S3BUCKETNAME
+          Value: 'S3UpdatesBucket'
       Source:
         BuildSpec: infrastructure/buildspec.yml
         Type: CODEPIPELINE
@@ -186,7 +190,9 @@ Resources:
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties: 
-      ArtifactStore: !Ref ArtifactsBucket
+      ArtifactStore:
+        Location: !Ref ArtifactsBucket
+        Type: S3
       Name: !Sub ${Prefix}-${Environment}-codepipeline 
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
@@ -205,7 +211,7 @@ Resources:
                 Branch: !Ref GitHubBranch
                 OAuthToken: !Ref GitToken 
               OutputArtifacts: 
-                - SourceOutput
+                - Name: SourceOutput
               RunOrder: 1
 
         - Name : Build
@@ -218,9 +224,8 @@ Resources:
               Configuration: 
                 ProjectName: !Ref BuildS3UpdatesStack
               InputArtifacts: 
-                - SourceOutput
+                - Name: SourceOutput
               Name: Build-S3Updates-Stack
               OutputArtifacts: 
-                - BuildOutput
-              RoleArn: !Ref CodeBuildRole
+                - Name: BuildOutput
               RunOrder: 1
