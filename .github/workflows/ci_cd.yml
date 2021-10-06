@@ -27,11 +27,9 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - run: |
-        sudo apt-get update
-        ls -la
-        sed -i -e "s|{Secret_Key}|${{env.Secret_Key}}|g; s|{Access_Key}|${{env.Access_Key}}|g" ./scripts/cfn.json
-
+      - run: sudo apt-get update
+      - run: ls -la
+      - run: sed -i -e "s|{Secret_Key}|${{env.Secret_Key}}|g; s|{Access_Key}|${{env.Access_Key}}|g" ./scripts/cfn.json
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
