@@ -27,14 +27,11 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - run:  sed -i -e "s|{Secret_Key}|${{env.Secret_Key}}|g; s|{Access_Key}|${{env.Access_Key}}|g" cfn.json
+      - run:  sed -i -e "s|{Secret_Key}|${{env.Secret_Key}}|g; s|{Access_Key}|${{env.Access_Key}}|g" ./scripts/cfn.json
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
-
-      - name: Create a default profile using the aws creds
-        run: sed -i -e "s/{Secret_Key}/${{env.Secret_Key}}/g; s/{Access_Key}/${{env.Access_Key}}/g" cfn.json
 
       - name: change file permissions
         run: chmod 777 ./scripts/gw_deploy.sh
