@@ -19,6 +19,9 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    env:
+      Access_Key: ${{secrets.ACCESS_KEY}}
+      Secret_Key: ${{secrets.SECRET_KEY}}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -29,8 +32,11 @@ jobs:
       - name: Run a one-line script
         run: echo Hello, world!
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Create a default profile using the aws creds
+        run: sed -i -e "s/{Secret_Key}/${{env.Secret_Key}}/g; s/{Access_Key}/${{env.Access_Key}}/g" cfn.json
+
+      - name: change file permissions
+        run: chmod 777 ./scripts/gw_deploy.sh
+
+      - name: Moving build to artifacts directory
+        run: ./scripts/gw_deploy.sh

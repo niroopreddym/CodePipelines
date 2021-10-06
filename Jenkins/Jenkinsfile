@@ -1,0 +1,68 @@
+pipeline {
+   agent {
+      dockerfile {
+         filename 'Dockerfile-Build'
+         args '-u root'
+      }
+   }
+
+   environment {
+      GITHUB_TOKEN          = credentials('tenants-ui-github-token')
+      SONAR_TOKEN           = credentials('tenants-ui-sonar-token')
+      AWS_REGION            = "eu-west-2"
+      AWS_DEFAULT_REGION    = "eu-west-2"
+      PROJECT_NAME          = "Tenants API"
+      SONAR_BRANCH          = "Tenants API"
+   }
+      
+   stages {
+      stage('Clean') {
+         steps {
+            sh '(cd ${WORKSPACE}/src; make clean;)'
+         }
+      }
+
+      stage('Install') {
+         steps {
+            sh 'git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"'            
+            sh 'go get github.com/securego/gosec/cmd/gosec'
+            sh 'go get golang.org/x/lint'
+            sh 'npm install'
+         }
+      }
+      stage('Analyse') {
+         steps {
+            parallel(
+               "Go Vet": {
+                  sh '(cd ${WORKSPACE}/src; make vet)'
+               },
+               "Go Lint": {
+                  sh '(cd ${WORKSPACE}; make go_linting)'
+               },
+               "CFN Linting": {
+                  sh '(cd ${WORKSPACE}; make cfn-lint)'
+               },
+            )
+         }
+      }
+     
+      stage('Deploy') {
+         parallel {
+            stage('Development') {
+               when { branch 'develop' }
+               steps {
+                  script {
+                     sh '(cd ${WORKSPACE}; TARGET_ENVIRONMENT=dev ./deploy.sh )'
+                  }
+               }
+            }
+         }
+      }
+   }
+   //Cleanup
+   post {
+      cleanup {
+         cleanWs()
+      }
+   }
+}

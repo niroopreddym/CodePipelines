@@ -1,0 +1,48 @@
+FROM maven:3.6-openjdk-11
+
+RUN groupadd -g 999 jenkins
+RUN useradd -u 111 -g 999 jenkins
+
+# Install go
+RUN curl -O https://dl.google.com/go/go1.14.3.linux-amd64.tar.gz
+RUN tar xvf go1.14.3.linux-amd64.tar.gz
+
+ENV PATH /go/bin:/usr/local/go/bin:$PATH
+ENV GOPATH /go
+ENV GO111MODULE on
+ENV GOPRIVATE 'github.com/emisgroup'
+
+# https://issues.jenkins-ci.org/browse/JENKINS-51964
+ENV XDG_CACHE_HOME "/tmp/.cache"
+
+# Required for the sonar build stage
+ENV XDG_CONFIG_HOME "/tmp/.config"
+ENV SONAR_USER_HOME "/tmp/.sonar"
+
+ENV HOME '/tmp'
+ENV CI true
+
+# Install other dependencies
+RUN apt-get update && \
+	apt-get install -y \
+	ca-certificates \
+	gcc \
+	git \
+	curl \
+	make \
+	zip \
+	jq \
+	awscli \
+	shellcheck \
+	python3.7 \
+	python3-pip \
+	python3-venv
+
+# Install pip
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install virtualenv
+
+# Install node
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+RUN whoami
