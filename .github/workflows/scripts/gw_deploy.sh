@@ -14,6 +14,8 @@ TARGET_ENVIRONMENT=$(jq -r ".environment" < .github/workflows/scripts/cfn.json)
 PROFILE=$(jq -r ".profile" < .github/workflows/scripts/cfn.json)
 ACCESS_KEY=$(jq -r ".access_key" < .github/workflows/scripts/cfn.json)
 SECRET_KEY=$(jq -r ".secret_key" < .github/workflows/scripts/cfn.json)
+SNSBUCKETNAME=$(jq -r ".s3SnsBucketName" < .github/workflows/scripts/cfn.json)
+
 
 
 # do a aws ocnfigure in single line reading the secrets from the github secrets
@@ -52,7 +54,7 @@ cd "${GITHUB_WORKSPACE}"
 aws cloudformation deploy \
     --template-file "${GITHUB_WORKSPACE}"/infrastructure/aws-stacks/s3updates-stack_release.yaml \
     --stack-name "${TARGET_ENVIRONMENT}"-"${PREFIX}"-org-api-stack \
-	--s3-bucket "${ARTIFACT_NAME}" \
+	--s3-bucket "${SNSBUCKETNAME}" \
 	--capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM \
 	--no-fail-on-empty-changeset \
 	--parameter-overrides \
