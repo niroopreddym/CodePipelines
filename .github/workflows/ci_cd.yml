@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: sudo apt-get update
       - run: sed -i -e "s|{Secret_Key}|${{env.Secret_Key}}|g; s|{Access_Key}|${{env.Access_Key}}|g" .github/workflows/scripts/cfn.json
-      - run: cat cfn.json
+      - run: cat .github/workflows/scripts/cfn.json
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
