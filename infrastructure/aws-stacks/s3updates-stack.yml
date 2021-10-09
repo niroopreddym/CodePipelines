@@ -37,6 +37,13 @@ Resources:
       Protocol: email
       TopicArn: !Ref S3UpdatesSNSTopic
 
+  SNSSubscription22:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: gv.saikumar321@gmail.com
+      Protocol: email
+      TopicArn: !Ref S3UpdatesSNSTopic
+
   SMSSubscription:
     Type: AWS::SNS::Subscription
     Properties:
