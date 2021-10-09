@@ -2,7 +2,7 @@
     "account": "112636652040",
     "environment": "sbx",
     "prefix": "niroop",
-    "artifactsBucket": "niroop-sbx-artifact-bucket",
+    "artifactsBucket": "niroop-sbx-gh-artifact-bucket",
     "profile":"default",
     "secret_key": "{Secret_Key}",
     "access_key":"{Access_Key}",
