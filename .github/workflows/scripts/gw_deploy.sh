@@ -5,6 +5,8 @@
 ##
 # Read parameters from cfn.json
 ##
+cat .github/workflows/scripts/cfn.json
+
 ROLE_ARN=$(jq -r ".targetAccountRoleArn" < .github/workflows/scripts/cfn.json)
 ARTIFACT_NAME=$(jq -r ".artifactsBucket" < .github/workflows/scripts/cfn.json)
 PREFIX=$(jq -r ".prefix" < .github/workflows/scripts/cfn.json)
@@ -17,7 +19,7 @@ SECRET_KEY=$(jq -r ".secret_key" < .github/workflows/scripts/cfn.json)
 # do a aws ocnfigure in single line reading the secrets from the github secrets
 aws configure set aws_access_key_id ${ACCESS_KEY}
 aws configure set aws_secret_access_key ${SECRET_KEY}
-aws configure set region = eu-west-2
+aws configure set region = "eu-west-2"
 
 ##
 # Assuming the roles required to deploy on the target account.
