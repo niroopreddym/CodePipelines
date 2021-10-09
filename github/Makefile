@@ -1,7 +1,7 @@
 ENVIRONMENT = sbx
 PREFIX = niroop
-PROFILE = default
-BUCKET_NAME = artifact
+PROFILE = admin
+BUCKET_NAME = gh-artifact
 
 .PHONY: explain
 explain:

@@ -53,12 +53,12 @@ cd "${GITHUB_WORKSPACE}"
 ##
 aws cloudformation deploy \
     --template-file "${GITHUB_WORKSPACE}"/infrastructure/aws-stacks/s3updates-stack_release.yaml \
-    --stack-name "${TARGET_ENVIRONMENT}"-"${PREFIX}"-org-api-stack \
-	--s3-bucket "${SNSBUCKETNAME}" \
+    --stack-name "${TARGET_ENVIRONMENT}"-"${PREFIX}"-event-stack\
+	--s3-bucket "${ARTIFACT_NAME}" \
 	--capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM \
 	--no-fail-on-empty-changeset \
 	--parameter-overrides \
 	Environment="${TARGET_ENVIRONMENT}" \
     Prefix="${PREFIX}" \
-    BucketName="${ARTIFACT_NAME}" \
+    BucketName="${SNSBUCKETNAME}" \
     
