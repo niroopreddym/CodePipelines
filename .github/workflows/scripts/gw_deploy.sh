@@ -24,7 +24,7 @@ aws configure set default.region eu-west-2
 ##
 # Assuming the roles required to deploy on the target account.
 ##
-ASSUMED_CREDENTIALS=$(aws sts assume-role --role-arn "${ROLE_ARN}" --role-session-name deploy-"${TARGET_ENVIRONMENT}" --profile default)
+ASSUMED_CREDENTIALS=$(aws sts get-session-token)
 AWS_ACCESS_KEY_ID=$(echo "${ASSUMED_CREDENTIALS}" | jq -r .Credentials.AccessKeyId)
 AWS_SECRET_ACCESS_KEY=$(echo "${ASSUMED_CREDENTIALS}" | jq -r .Credentials.SecretAccessKey)
 AWS_SESSION_TOKEN=$(echo "${ASSUMED_CREDENTIALS}" | jq -r .Credentials.SessionToken)
