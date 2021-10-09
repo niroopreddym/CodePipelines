@@ -38,4 +38,4 @@ jobs:
         run: chmod 777 .github/workflows/scripts/gw_deploy.sh
 
       - name: starting thr deployment process
-        run: .github/workflows/gw_deploy.sh
+        run: .github/workflows/scripts/gw_deploy.sh
