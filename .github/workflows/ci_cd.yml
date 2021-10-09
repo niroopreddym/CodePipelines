@@ -35,7 +35,7 @@ jobs:
         run: echo Hello, world!
 
       - name: change file permissions
-        run: chmod 777 ./scripts/gw_deploy.sh
+        run: chmod 777 .github/workflows/scripts/gw_deploy.sh
 
-      - name: Moving build to artifacts directory
-        run: ./scripts/gw_deploy.sh
+      - name: starting thr deployment process
+        run: .github/workflows/gw_deploy.sh
