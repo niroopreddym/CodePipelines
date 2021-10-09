@@ -38,12 +38,10 @@ export AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}"
 ##
 cd "${GITHUB_WORKSPACE}"/infrastructure
 
-ls -la
-
 aws cloudformation package \
-    --template-file infrastructure/aws-stacks/s3updates-stack.yml \
+    --template-file aws-stacks/s3updates-stack.yml \
     --s3-bucket "${ARTIFACT_NAME}" \
-    --output-template-file infrastructure/aws-stacks/s3updates-stack_release.yaml
+    --output-template-file aws-stacks/s3updates-stack_release.yaml
 
 cd "${GITHUB_WORKSPACE}"
 
