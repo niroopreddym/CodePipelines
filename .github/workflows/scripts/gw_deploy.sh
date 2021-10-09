@@ -5,13 +5,13 @@ set -e
 ##
 # Read parameters from cfn.json
 ##
-ROLE_ARN=$(jq -r ".targetAccountRoleArn" < cfn.json)
-ARTIFACT_NAME=$(jq -r ".artifactsBucket" < cfn.json)
-PREFIX=$(jq -r ".prefix" < cfn.json)
-TARGET_ENVIRONMENT=$(jq -r ".environment" < cfn.json)
-PROFILE=$(jq -r ".profile" < cfn.json)
-ACCESS_KEY=$(jq -r ".access_key" < cfn.json)
-SECRET_KEY=$(jq -r ".secret_key" < cfn.json)
+ROLE_ARN=$(jq -r ".targetAccountRoleArn" < .github/workflows/scripts/cfn.json)
+ARTIFACT_NAME=$(jq -r ".artifactsBucket" < .github/workflows/scripts/cfn.json)
+PREFIX=$(jq -r ".prefix" < .github/workflows/scripts/cfn.json)
+TARGET_ENVIRONMENT=$(jq -r ".environment" < .github/workflows/scripts/cfn.json)
+PROFILE=$(jq -r ".profile" < .github/workflows/scripts/cfn.json)
+ACCESS_KEY=$(jq -r ".access_key" < .github/workflows/scripts/cfn.json)
+SECRET_KEY=$(jq -r ".secret_key" < .github/workflows/scripts/cfn.json)
 
 
 # do a aws ocnfigure in single line reading the secrets from the github secrets
